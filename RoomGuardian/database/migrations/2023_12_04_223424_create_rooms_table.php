@@ -16,13 +16,13 @@ return new class extends Migration
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users');
-            $table->string("name", 50);
+            $table->string("name", 50)->unique();
             $table->boolean('Sensor_magnetico')->default(false);
             $table->boolean('Sensor_movimiento')->default(false);
-            $table->float('Sensor_temperatura')->nullable();
-            $table->float('Sensor_humedad')->nullable();
-            $table->boolean('Sensor_Luz')->default(false);
-            $table->float('Sensor_Voltaje')->nullable();
+            $table->float('sensor_temperatura')->nullable();
+            $table->float('sensor_humedad')->nullable();
+            $table->boolean('sensor_luz')->default(false);
+            $table->float('sensor_voltaje')->nullable();
             $table->timestamps();
         });
     }

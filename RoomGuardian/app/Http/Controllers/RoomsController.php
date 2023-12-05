@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RoomsController extends Controller
@@ -38,9 +39,20 @@ class RoomsController extends Controller
 
     public function store(Request $request)
     {
+        $validacion = Validator::make($request->all(), [
+            "name" => ["required", "min:6", "max:50"],
+        ]);
+        if ($validacion->fails()) {
+
+            return response()->json([
+                "process"=>"failed",
+                "menssage"=>$validacion->errors()
+            ]);
+        }
         $token = JWTAuth::parseToken();
         $user = $token->authenticate();
         $room = new Room();
+        $room->name = $request->name;
         $room->user_id = $user->id;
         $room->save();
         return response()->json([
