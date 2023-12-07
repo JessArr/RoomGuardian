@@ -13,14 +13,14 @@ class RoomsController extends Controller
     {
         $token = JWTAuth::parseToken();
         $user = $token->authenticate();
-        $rooms = Room::where('user_id', $user->id)->get();
+        $rooms = Room::select('id', 'name')->where('user_id', $user->id)->get();
         if ($rooms->isEmpty()) {
             return response()->json([
                 'process' => 'failed',
                 'error' => "Habitaciones no encontradas"
             ], 404);
         }
-        return response()->json($rooms);
+        return response()->json(["Habitaciones"=>$rooms]);
     }
 
     public function roomdetail(Request $request, $id)
@@ -34,7 +34,7 @@ class RoomsController extends Controller
                 'error' => "Habitación no encontrada"
             ], 404);
         }
-        return response()->json($room);
+        return response()->json(["Habitación"=>$room]);
     }
 
     public function store(Request $request)
