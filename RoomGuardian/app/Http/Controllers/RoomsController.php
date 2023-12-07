@@ -105,4 +105,11 @@ class RoomsController extends Controller
             "room" => $room
         ], 204);
     }
+    public function roomSensors(Request $request, $id)
+    {
+        $token = JWTAuth::parseToken();
+        $user = $token->authenticate();
+
+    }
+
 }
