@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users');
             $table->string("name", 50)->unique();
-            $table->boolean('Sensor_magnetico')->default(false);
-            $table->boolean('Sensor_movimiento')->default(false);
+            $table->boolean('sensor_magnetico')->default(false);
+            $table->boolean('sensor_movimiento')->default(false);
             $table->float('sensor_temperatura')->nullable();
             $table->float('sensor_humedad')->nullable();
             $table->boolean('sensor_luz')->default(false);

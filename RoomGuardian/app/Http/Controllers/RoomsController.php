@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -34,6 +35,30 @@ class RoomsController extends Controller
                 'error' => "Habitación no encontrada"
             ], 404);
         }
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-infrarojo/data/last');
+        $room->sensor_movimiento = $response->json()['value'];
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-magnetico/data/last');
+        $room->sensor_magnetico = $response->json()['value'];
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-voltaje/data/last');
+        $room->sensor_voltaje = $response->json()['value'];
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-luz/data/last');
+        $room->sensor_luz = $response->json()['value'];
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-temperatura/data/last');
+        $room->sensor_temperatura = $response->json()['value'];
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-humedad/data/last');
+        $room->sensor_humedad = $response->json()['value'];
         return response()->json(["Habitación"=>$room]);
     }
 
@@ -104,12 +129,6 @@ class RoomsController extends Controller
             "message" => "Habitación eliminada correctamente",
             "room" => $room
         ], 204);
-    }
-    public function roomSensors(Request $request, $id)
-    {
-        $token = JWTAuth::parseToken();
-        $user = $token->authenticate();
-
     }
 
 }
