@@ -130,4 +130,20 @@ class AuthsController extends Controller
         $user->save();
         return view('registro_confirmado', compact('user'));
     }
+    public function ValidarToken(Request $request)
+    {
+        $token = JWTAuth::getToken();
+        try {
+            $token->check();
+            return response()->json([
+                "process" => "successful",
+                "message" => true
+            ], 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json([
+                "process" => "failed",
+                "message" => false
+            ], 401);
+        }
+    }
 }
