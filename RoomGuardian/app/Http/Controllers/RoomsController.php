@@ -10,6 +10,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RoomsController extends Controller
 {
+    private $aiokey = 'aio_PuCS91YIwUqjXdw49m8UVyxirKMB';
     public function roomsUser(Request $request)
     {
         $token = JWTAuth::parseToken();
@@ -52,8 +53,9 @@ class RoomsController extends Controller
     }
 
     public function getAdafruitSensorData($feedName){
+        ;
         $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_CmMw96Bex9QV52LbAfzWVjQl5kuK',
+            'X-AIO-Key' => $this->aiokey,
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/'.$feedName.'/data/last');
         if (!$response->ok()) {
             return response()->json([
@@ -106,8 +108,19 @@ class RoomsController extends Controller
         ], 200);
     }
     public function limtemperatura(Request $request){
+        $validacion = Validator::make($request->all(), [
+            "value" => ["required", "numeric"],
+        ]);
+        if ($validacion->fails()) {
+
+            return response()->json([
+                "process"=>"failed",
+                "menssage"=>$validacion->errors()
+            ]);
+        }
+
     $response=Http::withHeaders( [
-        'X-AIO-Key' => 'aio_CmMw96Bex9QV52LbAfzWVjQl5kuK',
+        'X-AIO-Key' => $this->aiokey,
     ])->post('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-temperaturamax/data', [
         'value' => $request->input('value'),
     ]);
