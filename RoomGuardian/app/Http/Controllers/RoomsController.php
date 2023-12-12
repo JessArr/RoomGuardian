@@ -29,36 +29,80 @@ class RoomsController extends Controller
         $token = JWTAuth::parseToken();
         $user = $token->authenticate();
         $room = Room::where('user_id', $user->id)->find($id);
+
         if (!$room) {
             return response()->json([
                 'process' => 'failed',
                 'error' => "Habitación no encontrada"
             ], 404);
         }
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-infrarojo/data/last');
-        $room->sensor_movimiento = $response->json()['value'];
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
+            $room->sensor_movimiento = $response->json()['value'];
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-magnetico/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
         $room->sensor_magnetico = $response->json()['value'];
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-voltaje/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
         $room->sensor_voltaje = $response->json()['value'];
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-luz/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
         $room->sensor_luz = $response->json()['value'];
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-temperatura/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
         $room->sensor_temperatura = $response->json()['value'];
+
         $response=Http::withHeaders( [
             'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-humedad/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
         $room->sensor_humedad = $response->json()['value'];
+
         return response()->json(["Habitación"=>$room]);
     }
 
@@ -98,6 +142,7 @@ class RoomsController extends Controller
                 'error' => "Habitación no encontrada"
             ], 404);
         }
+
         $room->Sensor_Magnetico = $request->input('Sensor_Magnetico');
         $room->Sensor_Movimiento = $request->input('Sensor_Movimiento');
         $room->Sensor_Temperatura = $request->input('Sensor_Temperatura');
@@ -117,7 +162,7 @@ class RoomsController extends Controller
         $token = JWTAuth::parseToken();
         $user = $token->authenticate();
         $room = Room::where('user_id', $user->id)->find($id);
-        if ($room->isEmpty()){
+        if (!$room){
             return response()->json([
                 'process' => 'failed',
                 'error' => "Habitación no encontrada"
@@ -125,10 +170,8 @@ class RoomsController extends Controller
         }
         $room->delete();
         return response()->json([
-            "process" => "success",
-            "message" => "Habitación eliminada correctamente",
-            "room" => $room
-        ], 204);
+            "process" => "success"
+        ], 200);
     }
 
 }

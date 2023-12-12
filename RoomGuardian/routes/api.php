@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::post( 'register', [AuthsController::class, 'register'] );
 Route::post( 'login', [AuthsController::class, 'login'] );
 Route::get( '/verificaremail', [AuthsController::class, 'verificarmail'] )->name( 'verificaremail' )->middleware( 'signed' );
-Route::get('validarToken', [AuthsController::class, 'ValidarToken']);
+Route::get('validarToken', [AuthsController::class, 'tokenvalidate']);
 
 Route::group( ['middleware' => 'validartoken'], function () {
     Route::post( 'logout', [AuthsController::class, 'logout'] );

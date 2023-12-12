@@ -146,4 +146,21 @@ class AuthsController extends Controller
             ], 401);
         }
     }
+    public function tokenvalidate(Request $request)
+    {
+        $isValidToken = false;
+
+        try {
+            JWTAuth::parseToken()->authenticate();
+            $isValidToken = true;
+        } catch (\Exception $e) {
+            $isValidToken = false;
+        }
+
+        return response()->json([
+            "process" => "successful",
+            "message" => $isValidToken
+        ], $isValidToken ? 200 : 401);
+    }
+
 }
