@@ -36,74 +36,32 @@ class RoomsController extends Controller
                 'error' => "Habitación no encontrada"
             ], 404);
         }
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-infrarojo/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-            $room->sensor_movimiento = $response->json()['value'];
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-magnetico/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-        $room->sensor_magnetico = $response->json()['value'];
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-voltaje/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-        $room->sensor_voltaje = $response->json()['value'];
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-luz/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-        $room->sensor_luz = $response->json()['value'];
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-temperatura/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-        $room->sensor_temperatura = $response->json()['value'];
-
-        $response=Http::withHeaders( [
-            'X-AIO-Key' => 'aio_YZpp12PIHUF4JYBmAgoqUKzhZTtP',
-        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-humedad/data/last');
-        if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
-        }
-        $room->sensor_humedad = $response->json()['value'];
-
+        $response=$this->getAdafruitSensorData('habitacion1-infrarojo');
+        $room->sensor_movimiento = $response;
+        $response=$this->getAdafruitSensorData('habitacion1-magnetico');
+        $room->sensor_magnetico = $response;
+        $response=$this->getAdafruitSensorData('habitacion1-voltaje');
+        $room->sensor_voltaje = $response;
+        $response=$this->getAdafruitSensorData('habitacion1-luz');
+        $room->sensor_luz = $response;
+        $response=$this->getAdafruitSensorData('habitacion1-temperatura');
+        $room->sensor_temperatura = $response;
+        $response=$this->getAdafruitSensorData('habitacion1-humedad');
+        $room->sensor_humedad = $response;
         return response()->json(["Habitación"=>$room]);
+    }
+
+    public function getAdafruitSensorData($feedName){
+        $response=Http::withHeaders( [
+            'X-AIO-Key' => 'aio_CmMw96Bex9QV52LbAfzWVjQl5kuK',
+        ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/'.$feedName.'/data/last');
+        if (!$response->ok()) {
+            return response()->json([
+                'process' => 'failed',
+                'error' => "Falló la conexión con el servidor"
+            ], 404);
+        }
+        return $response->json()['value'];
     }
 
     public function store(Request $request)
@@ -131,32 +89,6 @@ class RoomsController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, $id)
-    {
-        $token = JWTAuth::parseToken();
-        $user = $token->authenticate();
-        $room = Room::where('user_id', $user->id)->find($id);
-        if (!$room) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Habitación no encontrada"
-            ], 404);
-        }
-
-        $room->Sensor_Magnetico = $request->input('Sensor_Magnetico');
-        $room->Sensor_Movimiento = $request->input('Sensor_Movimiento');
-        $room->Sensor_Temperatura = $request->input('Sensor_Temperatura');
-        $room->Sensor_Humedad = $request->input('Sensor_Humedad');
-        $room->Sensor_Luz = $request->input('Sensor_Luz');
-        $room->Sensor_Voltaje = $request->input('Sensor_Voltaje');
-        $room->save();
-        return response()->json([
-            "process" => "success",
-            "message" => "Ha actualizado la habitación correctamente",
-            "room" => $room
-        ]);
-    }
-
     public function destroy(Request $request, $id)
     {
         $token = JWTAuth::parseToken();
@@ -174,8 +106,21 @@ class RoomsController extends Controller
         ], 200);
     }
     public function limtemperatura(Request $request){
-
+    $response=Http::withHeaders( [
+        'X-AIO-Key' => 'aio_CmMw96Bex9QV52LbAfzWVjQl5kuK',
+    ])->post('https://io.adafruit.com/api/v2/Biozone090/feeds/habitacion1-temperaturamax/data', [
+        'value' => $request->input('value'),
+    ]);
+    if (!$response->ok()) {
+        return response()->json([
+            'process' => 'failed',
+            'error' => "Falló la conexión con el servidor"
+        ], 404);
     }
-
-
+    return response()->json([
+        "process" => "success",
+        "message" => "Se ha actualizado el limite de  temperatura correctamente",
+        "room" => $response->json()
+    ], 200);
+    }
 }
