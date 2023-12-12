@@ -173,5 +173,9 @@ class RoomsController extends Controller
             "process" => "success"
         ], 200);
     }
+    public function limtemperatura(Request $request){
+
+    }
+
 
 }
