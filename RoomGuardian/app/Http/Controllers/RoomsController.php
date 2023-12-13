@@ -10,17 +10,14 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RoomsController extends Controller
 {
-    private $aiokey = 'aio_PuCS91YIwUqjXdw49m8UVyxirKMB';
+    private $aiokey = 'aio_fLIw37qf7kmqY3SvCQASnGx2oZXy';
     public function roomsUser(Request $request)
     {
         $token = JWTAuth::parseToken();
         $user = $token->authenticate();
         $rooms = Room::select('id', 'name')->where('user_id', $user->id)->get();
-        if ($rooms->isEmpty()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Habitaciones no encontradas"
-            ], 404);
+        if (!$rooms) {
+            return $this->Errror(404,"Habitación no encontrada");
         }
         return response()->json(["Habitaciones"=>$rooms]);
     }
@@ -32,10 +29,7 @@ class RoomsController extends Controller
         $room = Room::where('user_id', $user->id)->find($id);
 
         if (!$room) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Habitación no encontrada"
-            ], 404);
+            return $this->Errror(404,"Habitación no encontrada");
         }
         $response=$this->getAdafruitSensorData('habitacion1-infrarojo');
         $room->sensor_movimiento = $response;
@@ -53,15 +47,11 @@ class RoomsController extends Controller
     }
 
     public function getAdafruitSensorData($feedName){
-        ;
         $response=Http::withHeaders( [
             'X-AIO-Key' => $this->aiokey,
         ])->get('https://io.adafruit.com/api/v2/Biozone090/feeds/'.$feedName.'/data/last');
         if (!$response->ok()) {
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Falló la conexión con el servidor"
-            ], 404);
+            return $this->Errror(404,"Falló la conexión con el servidor");
         }
         return $response->json()['value'];
     }
@@ -97,10 +87,7 @@ class RoomsController extends Controller
         $user = $token->authenticate();
         $room = Room::where('user_id', $user->id)->find($id);
         if (!$room){
-            return response()->json([
-                'process' => 'failed',
-                'error' => "Habitación no encontrada"
-            ], 404);
+            return $this->Errror(404,"Habitación no encontrada");
         }
         $room->delete();
         return response()->json([
@@ -116,7 +103,7 @@ class RoomsController extends Controller
             return response()->json([
                 "process"=>"failed",
                 "menssage"=>$validacion->errors()
-            ]);
+            ],422);
         }
 
     $response=Http::withHeaders( [
@@ -125,15 +112,19 @@ class RoomsController extends Controller
         'value' => $request->input('value'),
     ]);
     if (!$response->ok()) {
-        return response()->json([
-            'process' => 'failed',
-            'error' => "Falló la conexión con el servidor"
-        ], 404);
+        return $this->Errror(404,"Falló la conexión con el servidor");
     }
     return response()->json([
         "process" => "success",
         "message" => "Se ha actualizado el limite de  temperatura correctamente",
         "room" => $response->json()
     ], 200);
+    }
+    public function Errror($Status,$Message)
+    {
+        return response()->json([
+            "process" => "failed",
+            "error" => $Message
+        ], $Status);
     }
 }

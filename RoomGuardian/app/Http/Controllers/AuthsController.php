@@ -25,19 +25,12 @@ class AuthsController extends Controller
             'password_confirmation' =>["required", "min:6", "max:25","same:password"],
         ]);
         if ($validacion->fails()) {
-
-            return response()->json([
-                "process"=>"failed",
-                "menssage"=>$validacion->errors()
-            ]);
+            return $this->Errror(422,$validacion->errors());
         } else {
             $user = User::where('email', $request->email)->first();
 
             if ($user) {
-                return response()->json([
-                    "process" => "failed",
-                    'message' => 'El usuario ya existe'
-                ], 409);
+                return $this->Errror(409,"El usuario ya existe");
             }
 
             $link = URL::temporarySignedRoute('verificaremail', now()->addMinutes(20), [
@@ -64,23 +57,15 @@ class AuthsController extends Controller
             "password" => ["required", "min:6", "max:25"]
         ]);
         if ($validacion->fails()) {
-            return response()->json([
-                "process"=>"failed",
-                "menssage"=>$validacion->errors()
-            ]);
+
+            return $this->Errror(422,$validacion->errors());
         }
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return response()->json([
-                'process' => 'failed',
-                'message' => 'Usuario no encontrado'
-            ], 404);
+            return $this->Errror(404,"Usuario no encontrado");
         }
         if (!Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'process' => 'failed',
-                'message' => 'Contraseña incorrecta'
-            ], 401);
+            return $this->Errror(401,"Contraseña incorrecta");
         } else {
             $token = JWTAuth::fromUser($user);
             return response()->json([
@@ -140,10 +125,8 @@ class AuthsController extends Controller
                 "message" => true
             ], 200);
         } catch (TokenExpiredException $e) {
-            return response()->json([
-                "process" => "failed",
-                "message" => false
-            ], 401);
+
+            return $this->Errror(401,"false");
         }
     }
     public function tokenvalidate(Request $request)
@@ -161,6 +144,13 @@ class AuthsController extends Controller
             "process" => "successful",
             "message" => $isValidToken
         ], $isValidToken ? 200 : 401);
+    }
+    public function Errror($Status,$Message)
+    {
+        return response()->json([
+            "process" => "failed",
+            "message" => $Message
+        ], $Status);
     }
 
 }
